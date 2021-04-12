@@ -16,6 +16,8 @@ variable "environment" {
   default     = "dev"
 }
 
+
+
 variable "regionname" {
   description = "Provide location for azure resource"
   type        = string

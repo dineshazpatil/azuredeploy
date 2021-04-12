@@ -31,14 +31,19 @@ variable "environment" {
 variable "domainname" {
   description = "Provide the custom domain name want to add"
   type        = string
-} 
-
-variable "api_publisher_name"{
-    description = "Provide company name of api owner"
-    type= string
 }
 
-variable "api_publisher_email"{
-    description = "Provide owner email id for api"
-    type= string
+variable "api_publisher_org_name" {
+  description = "Provide company name of api owner"
+  type        = string
+}
+
+variable "api_publisher_email" {
+  description = "Provide owner email id for api"
+  type        = string
+}
+
+variable "password" {
+    description = "certificate password"
+    default = "password"
 }

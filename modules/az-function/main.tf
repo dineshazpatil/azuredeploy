@@ -85,9 +85,9 @@ resource "azurerm_function_app" "azfuncapp" {
 }
 
 resource "azurerm_app_service_custom_hostname_binding" "funcadddomain" {
-  hostname                 = var.domainname
-  app_service_name = azurerm_function_app.azfuncapp.name
-  resource_group_name      = var.resourcegroupname
+  hostname            = var.domainname
+  app_service_name    = azurerm_function_app.azfuncapp.name
+  resource_group_name = var.resourcegroupname
 
 }
 
@@ -95,11 +95,56 @@ data "azurerm_client_config" "current" {
 }
 
 resource "azurerm_api_management" "azapim" {
-  name                = "${var.project}-${var.environment}-apim" 
+  name                = "${var.project}-${var.environment}-apim"
   location            = var.regionname
   resource_group_name = var.resourcegroupname
   publisher_name      = "My Company"
   publisher_email     = "company@terraform.io"
 
   sku_name = "Developer_1"
+
 }
+
+resource "azurerm_api_management_certificate" "apim_cert" {
+  name                = "${var.project}-${var.environment}-apim-cert"
+  api_management_name = azurerm_api_management.azapim.name
+  resource_group_name = var.resourcegroupname
+  data                = filebase64("./appcerts/certificate.pfx")
+  password = var.password
+}
+
+resource "azurerm_api_management_custom_domain" "apim_custom_domain" {
+  api_management_id = azurerm_api_management.azapim.id
+
+    Gateway {
+    host_name    = var.domainname
+    certificate = filebase64("./appcerts/certificate.pfx")
+    certificate_password = var.password
+
+  }
+  
+  
+}
+
+resource "azurerm_api_management_api" "apim_public" {
+  name                  = "${var.project}-${var.environment}-apim-public"
+  api_management_name   = azurerm_api_management.azapim.name
+  resource_group_name   = var.resourcegroupname
+  revision              = "1"
+  display_name          = "Public"
+  path                  = ""
+  protocols             = ["https"]
+  service_url           = "https://${azurerm_function_app.azfuncapp.default_hostname}/api"
+  subscription_required = false
+}
+
+resource "azurerm_api_management_api_operation" "apim_api_op_public_hello_world" {
+  operation_id        = "public-hello-world"
+  api_name            = azurerm_api_management_api.apim_public.name
+  api_management_name = azurerm_api_management.azapim.name
+  resource_group_name = var.resourcegroupname
+  display_name        = "Hello World API endpoint"
+  method              = "GET"
+  url_template        = "/hello-world"
+}
+
