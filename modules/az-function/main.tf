@@ -62,7 +62,7 @@ resource "azurerm_app_service_plan" "azfuncsp" {
 }
 
 resource "azurerm_function_app" "azfuncapp" {
-  name                       = "${var.project}-${var.environment}app"
+  name                       = "${var.project}-${var.environment}-app"
   location                   = var.regionname
   resource_group_name        = var.resourcegroupname
   app_service_plan_id        = azurerm_app_service_plan.azfuncsp.id
@@ -95,7 +95,7 @@ data "azurerm_client_config" "current" {
 }
 
 resource "azurerm_api_management" "azapim" {
-  name                = "${var.project}${var.environment}apim" 
+  name                = "${var.project}-${var.environment}-apim" 
   location            = azurerm_resource_group.example.location
   resource_group_name = azurerm_resource_group.example.name
   publisher_name      = "My Company"
