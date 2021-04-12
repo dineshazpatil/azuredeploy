@@ -96,8 +96,8 @@ data "azurerm_client_config" "current" {
 
 resource "azurerm_api_management" "azapim" {
   name                = "${var.project}-${var.environment}-apim" 
-  location            = azurerm_resource_group.example.location
-  resource_group_name = azurerm_resource_group.example.name
+  location            = var.regionname
+  resource_group_name = var.resourcegroupname
   publisher_name      = "My Company"
   publisher_email     = "company@terraform.io"
 
