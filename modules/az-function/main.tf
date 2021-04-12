@@ -71,9 +71,11 @@ resource "azurerm_function_app" "azfuncapp" {
   https_only = true
   app_settings = {
     "WEBSITE_NODE_DEFAULT_VERSION": "~14",
+    "FUNCTIONS_EXTENSION_VERSION": "~3",
+    "HASH"="${filesha256("${var.project}${var.environment}.zip")}",
     "FUNCTIONS_WORKER_RUNTIME" = var.azfunctionruntime,
     "AzureWebJobsDisableHomepage" = "true",
-    "WEBSITE_RUN_FROM_PACKAGE"="https://${azurerm_storage_account.funcstorage.name}.blob.core.windows.net/${azurerm_storage_container.appstg_container.name}/${azurerm_storage_blob.appstg_blob.name}${data.azurerm_storage_account_sas.stg_sas.sas}",
+    "WEBSITE_RUN_FROM_PACKAGE": "https://${azurerm_storage_account.funcstorage.name}.blob.core.windows.net/${azurerm_storage_container.appstg_container.name}/${azurerm_storage_blob.appstg_blob.name}${data.azurerm_storage_account_sas.stg_sas.sas}",
   }
   
   site_config  {

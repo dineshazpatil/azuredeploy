@@ -1,7 +1,7 @@
 variable "project" {
    description = "Project name" 
    type= string
-   default="testnodeapp"
+   default="testnodeapp1"
 }
 
 variable "environment"{
