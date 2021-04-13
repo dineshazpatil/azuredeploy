@@ -44,6 +44,12 @@ variable "api_publisher_email" {
 }
 
 variable "password" {
-    description = "certificate password"
-    default = "password"
+  description = "certificate password"
+  default     = "password"
+}
+
+variable "appversion" {
+  description = "provide app version"
+  type        = string
+ 
 }

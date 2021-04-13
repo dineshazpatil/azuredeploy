@@ -1,0 +1,20 @@
+{
+  "bindings": [
+    {
+      "authLevel": "Anonymous",
+      "type": "httpTrigger",
+      "direction": "in",
+      "name": "hello",
+      "methods": [
+        "get",
+        "post"
+      ]
+    },
+    {
+      "type": "http",
+      "direction": "out",
+      "name": "res"
+    }
+  ],
+  "scriptFile": "../hello/index.js"
+}

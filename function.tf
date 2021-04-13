@@ -1,7 +1,7 @@
 data "archive_file" "archive_app" {
   type        = "zip"
   source_dir  = var.apppath
-  output_path = "${var.project}${var.environment}.zip"
+  output_path = "${var.project}${var.environment}${var.appversion}.zip"
 }
 
 module "az_function" {
@@ -15,6 +15,7 @@ module "az_function" {
   domainname             = "functionapp.pngsolutions.in"
   api_publisher_org_name = "Dinesh Ltd"
   api_publisher_email    = "dineshppatil@gmail.com"
+  appversion = var.appversion
 }
 
 

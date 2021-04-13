@@ -10,6 +10,13 @@ variable "apppath" {
   default     = "app"
 }
 
+variable "appversion" {
+  description = "provide app version"
+  type        = string
+  default     = "v4"
+
+}
+
 variable "environment" {
   description = "Provide environment name"
   type        = string
