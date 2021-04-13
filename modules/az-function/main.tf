@@ -13,11 +13,11 @@ resource "azurerm_storage_container" "appstg_container" {
 }
 
 resource "azurerm_storage_blob" "appstg_blob" {
-  name                   = "${var.project}${var.environment}func.zip"
+  name                   = "${var.project}${var.environment}${var.appversion}func.zip"
   storage_account_name   = azurerm_storage_account.funcstorage.name
   storage_container_name = azurerm_storage_container.appstg_container.name
   type                   = "Block"
-  source                 = "${var.project}${var.environment}.zip"
+  source                 = "${var.project}${var.environment}${var.appversion}.zip"
 }
 
 data "azurerm_storage_account_sas" "stg_sas" {
@@ -72,7 +72,7 @@ resource "azurerm_function_app" "azfuncapp" {
   app_settings = {
     "WEBSITE_NODE_DEFAULT_VERSION" : "~14",
     "FUNCTIONS_EXTENSION_VERSION" : "~3",
-    "HASH"                        = "${filesha256("${var.project}${var.environment}.zip")}",
+    "HASH"                        = "${filesha256("${var.project}${var.environment}${var.appversion}.zip")}",
     "FUNCTIONS_WORKER_RUNTIME"    = var.azfunctionruntime,
     "AzureWebJobsDisableHomepage" = "true",
     "WEBSITE_RUN_FROM_PACKAGE" : "https://${azurerm_storage_account.funcstorage.name}.blob.core.windows.net/${azurerm_storage_container.appstg_container.name}/${azurerm_storage_blob.appstg_blob.name}${data.azurerm_storage_account_sas.stg_sas.sas}",
@@ -85,9 +85,9 @@ resource "azurerm_function_app" "azfuncapp" {
 }
 
 resource "azurerm_app_service_custom_hostname_binding" "funcadddomain" {
-  hostname                 = var.domainname
-  app_service_name = azurerm_function_app.azfuncapp.name
-  resource_group_name      = var.resourcegroupname
+  hostname            = var.domainname
+  app_service_name    = azurerm_function_app.azfuncapp.name
+  resource_group_name = var.resourcegroupname
 
 }
 
@@ -95,11 +95,59 @@ data "azurerm_client_config" "current" {
 }
 
 resource "azurerm_api_management" "azapim" {
-  name                = "${var.project}-${var.environment}-apim" 
-  location            = azurerm_resource_group.example.location
-  resource_group_name = azurerm_resource_group.example.name
-  publisher_name      = "My Company"
-  publisher_email     = "company@terraform.io"
+  name                = "${var.project}-${var.environment}-apim"
+  location            = var.regionname
+  resource_group_name = var.resourcegroupname
+  publisher_name      = var.api_publisher_org_name
+  publisher_email     = var.api_publisher_email
 
   sku_name = "Developer_1"
+
 }
+
+resource "azurerm_api_management_certificate" "apim_cert" {
+  name                = "${var.project}-${var.environment}-apim-cert"
+  api_management_name = azurerm_api_management.azapim.name
+  resource_group_name = var.resourcegroupname
+  data                = filebase64("./appcerts/certificate.pfx")
+  password            = var.password
+}
+
+# resource "azurerm_api_management_custom_domain" "apim_custom_domain" {
+#   api_management_id = azurerm_api_management.azapim.id
+
+#   #   Gateway {
+#   #   host_name    = var.domainname
+#   #   certificate = filebase64("./appcerts/certificate.pfx")
+#   #   certificate_password = var.password
+
+#   # }
+
+
+# }
+
+resource "azurerm_api_management_api" "apim_public" {
+  name                = "${var.project}-${var.environment}-apim-public"
+  api_management_name = azurerm_api_management.azapim.name
+  resource_group_name = var.resourcegroupname
+  revision            = "1"
+  display_name        = "public"
+  path                = ""
+  protocols           = ["https"]
+  service_url           = "https://${azurerm_function_app.azfuncapp.default_hostname}/api"
+  subscription_required = false
+
+}
+
+resource "azurerm_api_management_api_operation" "apim_api_op_public_hello_world" {
+  operation_id        = "greeting"
+  api_name            = azurerm_api_management_api.apim_public.name
+  api_management_name = azurerm_api_management.azapim.name
+  resource_group_name = var.resourcegroupname
+  display_name        = "hello"
+  method              = "GET"
+  url_template        = "/hello"
+
+}
+
+
