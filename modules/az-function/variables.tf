@@ -51,5 +51,5 @@ variable "password" {
 variable "appversion" {
   description = "provide app version"
   type        = string
- 
+
 }

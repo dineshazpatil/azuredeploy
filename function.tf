@@ -15,7 +15,7 @@ module "az_function" {
   domainname             = "functionapp.pngsolutions.in"
   api_publisher_org_name = "Dinesh Ltd"
   api_publisher_email    = "dineshppatil@gmail.com"
-  appversion = var.appversion
+  appversion             = var.appversion
 }
 
 
